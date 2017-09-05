@@ -43,14 +43,14 @@ func FloatValidator(key string) Validator {
 }
 
 type FloatRange struct {
-	upper  float64
-	bottom float64
+	Upper  float64
+	Bottom float64
 }
 
 func FloatInRangeValidator(key string, floatRange FloatRange) Validator {
 	return func(value interface{}) error {
 		float := value.(float64)
-		if float > floatRange.upper || float < floatRange.bottom {
+		if float > floatRange.Upper || float < floatRange.Bottom {
 			return Error{key, "Invalid float", "FLOAT_RANGE_ERROR", nil}
 		}
 		return nil
