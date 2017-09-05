@@ -20,12 +20,12 @@ func (self ServerError) Error() string {
 	return self.Errors.Error()
 }
 
-func (self ServerError) write(w http.ResponseWriter) {
+func (self ServerError) Write(w http.ResponseWriter) {
 	JSON(w, self.Errors, self.StatusCode)
 }
 
 func raise500(w http.ResponseWriter) {
-	UndefinedKeyError("INTERNAL_SERVER_ERROR", "Something went wrong").writeWithCode(500, w)
+	UndefinedKeyError("INTERNAL_SERVER_ERROR", "Something went wrong").WriteWithCode(500, w)
 }
 
 func HTTP400() ServerError {
@@ -51,8 +51,8 @@ type Error struct {
 	Args        []string `json:"args, omitempty"`
 }
 
-func (self Error) writeWithCode(code int, w http.ResponseWriter) {
-	ServerError{code, Errors{[]Error{self}}}.write(w)
+func (self Error) WriteWithCode(code int, w http.ResponseWriter) {
+	ServerError{code, Errors{[]Error{self}}}.Write(w)
 }
 
 func UndefinedKeyError(code string, description string) Error {

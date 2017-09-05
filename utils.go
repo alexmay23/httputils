@@ -58,7 +58,7 @@ func DefaultMiddlewares(next http.Handler) http.Handler {
 func AccessMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Secret") != "Excellent" {
-			HTTP403().write(w)
+			HTTP403().Write(w)
 			return
 		}
 		next.ServeHTTP(w, r)
