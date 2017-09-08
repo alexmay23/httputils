@@ -179,14 +179,27 @@ func Find(collection *mdb.Collection, q bson.M, skip *int, limit *int) (*interfa
 }
 
 func IntParameterFromRequest(r *http.Request, name string) *int {
-	s := r.URL.Query().Get(name)
-	if len(s) == 0 {
+	s := GetValueFromURLInRequest(r, name)
+	if s == nil {
 		return nil
 	}
-	i64, err := strconv.ParseInt(s, 10, 64)
+	i64, err := strconv.ParseInt(*s, 10, 64)
 	if err != nil {
 		return nil
 	}
 	i := int(i64)
 	return &i
 }
+
+func FloatParameterFromRequest(r *http.Request, name string) *float64 {
+	s := GetValueFromURLInRequest(r, name)
+	if s == nil {
+		return nil
+	}
+	float, err := strconv.ParseFloat(*s, 64);
+	if err != nil {
+		return nil
+	}
+	return &float
+}
+
