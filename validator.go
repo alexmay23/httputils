@@ -42,16 +42,49 @@ func FloatValidator(key string) Validator {
 	}
 }
 
+func IntValidator(key string) Validator {
+	return func(value interface{}) error {
+		_, ok := value.(int)
+		if !ok {
+			return Error{key, " Should be int", "TYPE_ERROR", []string{"int"}}
+		}
+		return nil
+	}
+}
+
 type FloatRange struct {
-	Upper  float64
-	Bottom float64
+	Upper  *float64
+	Bottom *float64
+}
+
+type IntRange struct {
+	Upper  *int
+	Bottom *int
 }
 
 func FloatInRangeValidator(key string, floatRange FloatRange) Validator {
 	return func(value interface{}) error {
 		float := value.(float64)
-		if float > floatRange.Upper || float < floatRange.Bottom {
-			return Error{key, "Invalid float", "FLOAT_RANGE_ERROR", nil}
+		err := Error{key, "Invalid float", "FLOAT_RANGE_ERROR", nil}
+		if floatRange.Upper != nil && *floatRange.Upper < float{
+			return err;
+		}
+		if floatRange.Bottom != nil && *floatRange.Bottom > float{
+			return err;
+		}
+		return nil
+	}
+}
+
+func IntInRangeValidator(key string, intRange IntRange) Validator {
+	return func(value interface{}) error {
+		intValue := value.(int)
+		err := Error{key, "Invalid int", "INT_RANGE_ERROR", nil}
+		if intRange.Upper != nil && *intRange.Upper < intValue {
+			return err;
+		}
+		if intRange.Bottom != nil && *intRange.Bottom > intValue {
+			return err;
 		}
 		return nil
 	}
@@ -184,6 +217,7 @@ func CountryValidator(key string) Validator {
 	}
 }
 
+
 func RequiredStringValidators(key string, validators ...Validator) []Validator {
 	arr := []Validator{NotEmptyValidator(key), StringValidator(key)}
 	return append(arr, validators...)
@@ -191,6 +225,11 @@ func RequiredStringValidators(key string, validators ...Validator) []Validator {
 
 func RequiredFloatValidators(key string, validators ...Validator) []Validator {
 	arr := []Validator{NotEmptyValidator(key), FloatValidator(key)}
+	return append(arr, validators...)
+}
+
+func RequiredIntValidators(key string, validators ...Validator) []Validator {
+	arr := []Validator{NotEmptyValidator(key), IntValidator(key)}
 	return append(arr, validators...)
 }
 
