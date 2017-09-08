@@ -119,6 +119,27 @@ func GetValidatedBody(req *http.Request, validatorMap VMap) (map[string]interfac
 	return body, nil
 }
 
+
+func MapKeys(m VMap)[]string{
+	keys := []string{};
+	for key := range m{
+		keys = append(keys, key)
+	}
+	return keys
+}
+
+func GetValidatedURLParameters(req *http.Request, validatorMap VMap)(map[string]interface{}, error){
+	reqValues := make(map[string]interface{})
+	for _, key := range MapKeys(validatorMap){
+		reqValues[key] = GetValueFromURLInRequest(req, key)
+	}
+	errs := ValidateMap(reqValues, validatorMap);
+	if len(errs) > 0 {
+		return nil, ServerError{400, Errors{Errors: errs}}
+	}
+	return reqValues, nil
+}
+
 func ApplySkipLimit(query *mdb.Query, skip *int, limit *int) *mdb.Query {
 	if skip != nil {
 		query.Skip(*skip)
