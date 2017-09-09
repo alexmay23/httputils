@@ -114,7 +114,7 @@ func StringLengthValidator(length int, key string) Validator {
 }
 
 
-func ArrayValidator(key string, each []Validator) Validator {
+func ArrayValidator(key string) Validator {
 	return func(value interface{}) error {
 		_, ok := value.([]interface{})
 		if !ok {
