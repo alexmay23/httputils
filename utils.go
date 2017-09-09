@@ -131,7 +131,12 @@ func MapKeys(m VMap)[]string{
 func GetValidatedURLParameters(req *http.Request, validatorMap VMap)(map[string]interface{}, error){
 	reqValues := make(map[string]interface{})
 	for _, key := range MapKeys(validatorMap){
-		reqValues[key] = GetValueFromURLInRequest(req, key)
+		value := GetValueFromURLInRequest(req, key)
+		if value == nil{
+			reqValues[key] = nil
+		} else{
+			reqValues[key] = *value;
+		}
 	}
 	errs := ValidateMap(reqValues, validatorMap);
 	if len(errs) > 0 {
