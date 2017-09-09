@@ -1,14 +1,14 @@
 package httputils
 
 import (
-"errors"
-"fmt"
-"github.com/johngb/langreg"
-"gopkg.in/mgo.v2/bson"
-"log"
-"net/url"
-"strings"
-"time"
+	"errors"
+	"fmt"
+	"github.com/johngb/langreg"
+	"gopkg.in/mgo.v2/bson"
+	"log"
+	"net/url"
+	"strings"
+	"time"
 )
 
 type Validator func(value interface{}) error
@@ -113,13 +113,30 @@ func StringLengthValidator(length int, key string) Validator {
 	}
 }
 
-func StringArrayValidator(key string, each []Validator) Validator {
+
+func ArrayValidator(key string, each []Validator) Validator {
 	return func(value interface{}) error {
-		array, ok := value.([]string)
+		_, ok := value.([]interface{})
 		if !ok {
 			return Error{key, "Should be array", "TYPE_ERROR", []string{"array"}}
 		}
-		for _, item := range array {
+		return nil
+	}
+}
+
+
+func StringArrayValidator(key string, each []Validator) Validator {
+	return func(value interface{}) error {
+		values := value.([]interface{})
+		strArr := []string{}
+		for _, item := range values{
+			str, ok := item.(string)
+			if !ok{
+				return Error{key, "Should be string in array", "TYPE_ERROR", []string{"string", "array"}}
+			}
+			strArr = append(strArr, str)
+		}
+		for _, item := range strArr {
 			for _, validator := range each {
 				err := validator(item)
 				if err != nil {
