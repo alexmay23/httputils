@@ -41,8 +41,9 @@ func HTTP403() ServerError {
 	return ServerError{403, Errors{[]Error{UndefinedKeyError("PERMISSION_DENIED", "Permission denied")}}}
 }
 
-func HTTP404() ServerError {
-	return ServerError{404, Errors{[]Error{UndefinedKeyError("NOT_FOUND", "Item not found")}}}
+func HTTP404(id string) ServerError {
+	return ServerError{404, Errors{[]Error{Error{"undefined", "Item not found", "ITEM_NOT_FOUND", []string{id}}}}}
+
 }
 
 type Error struct {
