@@ -81,8 +81,8 @@ func RecoverMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func Now()int{
-	return int(time.Now().Unix())
+func Now()int64{
+	return int64(time.Now().Unix())
 }
 
 func LoggingMiddleware(next http.Handler) http.Handler {
