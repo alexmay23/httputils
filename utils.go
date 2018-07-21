@@ -1,6 +1,5 @@
 package httputils
 
-
 import (
 	"context"
 	"encoding/json"
@@ -13,8 +12,6 @@ import (
 	"strconv"
 	"time"
 )
-
-
 
 func wrapHandler(h http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -42,8 +39,8 @@ func RandStringBytes(n int) string {
 }
 
 func JSON(w http.ResponseWriter, value interface{}, code int) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	w.Header().Set("content-type", "application/json")
 	bytes, err := json.Marshal(value)
 	if err != nil {
 		panic(err)
@@ -57,7 +54,7 @@ func DefaultMiddlewares(next http.Handler) http.Handler {
 
 func AccessMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Secret") != "Excellent" {
+		if r.Header.Get("Secret") != "Secret" {
 			HTTP403().Write(w)
 			return
 		}
@@ -81,7 +78,7 @@ func RecoverMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func Now()int64{
+func Now() int64 {
 	return int64(time.Now().Unix())
 }
 
@@ -107,11 +104,8 @@ func GetBody(req *http.Request) (map[string]interface{}, error) {
 	return _map, nil
 }
 
-func GetValidatedBody(req *http.Request, validatorMap VMap) (map[string]interface{}, error) {
-	body, err := GetBody(req)
-	if err != nil {
-		return nil, err
-	}
+
+func ValidateBody(body map[string]interface{}, validatorMap VMap)(map[string]interface{}, error){
 	errs := ValidateMap(body, validatorMap)
 	if len(errs) > 0 {
 		return nil, ServerError{400, Errors{Errors: errs}}
@@ -119,22 +113,29 @@ func GetValidatedBody(req *http.Request, validatorMap VMap) (map[string]interfac
 	return body, nil
 }
 
+func GetValidatedBody(req *http.Request, validatorMap VMap) (map[string]interface{}, error) {
+	body, err := GetBody(req)
+	if err != nil {
+		return nil, err
+	}
+	return ValidateBody(body, validatorMap)
+}
 
-func MapKeys(m VMap)[]string{
+func MapKeys(m VMap) []string {
 	keys := []string{};
-	for key := range m{
+	for key := range m {
 		keys = append(keys, key)
 	}
 	return keys
 }
 
-func GetValidatedURLParameters(req *http.Request, validatorMap VMap)(map[string]interface{}, error){
+func GetValidatedURLParameters(req *http.Request, validatorMap VMap) (map[string]interface{}, error) {
 	reqValues := make(map[string]interface{})
-	for _, key := range MapKeys(validatorMap){
+	for _, key := range MapKeys(validatorMap) {
 		value := GetValueFromURLInRequest(req, key)
-		if value == nil{
+		if value == nil {
 			reqValues[key] = nil
-		} else{
+		} else {
 			reqValues[key] = *value;
 		}
 	}
@@ -160,9 +161,11 @@ func GetValueFromURLInRequest(r *http.Request, key string) *string {
 	var value string
 	if len(params) > 0 {
 		value = params[key]
-	} else {
+	}
+	if len(value) == 0 {
 		value = r.URL.Query().Get(key)
 	}
+
 	if len(value) == 0 {
 		return nil
 	}
@@ -228,4 +231,3 @@ func FloatParameterFromRequest(r *http.Request, name string) *float64 {
 	}
 	return &float
 }
-

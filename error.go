@@ -57,6 +57,11 @@ func (self Error) WriteWithCode(code int, w http.ResponseWriter) {
 	ServerError{code, Errors{[]Error{self}}}.Write(w)
 }
 
+
+func (self Error) AsServerError(code int)error {
+	return ServerError{code, Errors{[]Error{self}}}
+}
+
 func UndefinedKeyError(code string, description string) Error {
 	return Error{"undefined", description, code, nil}
 }
@@ -64,6 +69,9 @@ func UndefinedKeyError(code string, description string) Error {
 func (self Error) Error() string {
 	return self.Code
 }
+
+
+
 
 func (self Errors) Error() string {
 	return fmt.Sprintf("Occured %d errors", len(self.Errors))
