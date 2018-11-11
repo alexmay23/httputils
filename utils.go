@@ -68,7 +68,7 @@ func RecoverMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				raise500(w, err.(error))
+				raise500(w, err)
 			}
 		}()
 

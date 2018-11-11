@@ -24,9 +24,10 @@ func (self ServerError) Write(w http.ResponseWriter) {
 	JSON(w, self.Errors, self.StatusCode)
 }
 
-func raise500(w http.ResponseWriter, err error) {
+func raise500(w http.ResponseWriter, err interface{}) {
+	str := fmt.Sprintf("%v", err)
 	ServerError{500, Errors{[]Error{Error{"undefined",
-		"Internal server error", "INTERNAL_SERVER_ERROR", []string{err.Error()}}}}}.Write(w)
+		"Internal server error", "INTERNAL_SERVER_ERROR", []string{str}}}}}.Write(w)
 }
 
 func HTTP400() ServerError {
