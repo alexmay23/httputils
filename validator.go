@@ -56,12 +56,14 @@ func BoolValidator(key string) Validator {
 func IntValidator(key string) Validator {
 	return func(value interface{}) error {
 		_, ok := value.(int)
+		_, ok = value.(int64)
 		if !ok {
 			return Error{key, " Should be int", "TYPE_ERROR", []string{"int"}}
 		}
 		return nil
 	}
 }
+
 
 type FloatRange struct {
 	Upper  *float64
