@@ -75,6 +75,11 @@ type IntRange struct {
 	Bottom *int
 }
 
+type Int64Range struct {
+	Upper  *int64
+	Bottom *int64
+}
+
 func FloatInRangeValidator(key string, floatRange FloatRange) Validator {
 	return func(value interface{}) error {
 		float := value.(float64)
@@ -92,6 +97,21 @@ func FloatInRangeValidator(key string, floatRange FloatRange) Validator {
 func IntInRangeValidator(key string, intRange IntRange) Validator {
 	return func(value interface{}) error {
 		intValue := value.(int)
+		err := Error{key, "Invalid int", "INT_RANGE_ERROR", nil}
+		if intRange.Upper != nil && *intRange.Upper < intValue {
+			return err
+		}
+		if intRange.Bottom != nil && *intRange.Bottom > intValue {
+			return err
+		}
+		return nil
+	}
+}
+
+
+func Int64InRangeValidator(key string, intRange Int64Range) Validator {
+	return func(value interface{}) error {
+		intValue := value.(int64)
 		err := Error{key, "Invalid int", "INT_RANGE_ERROR", nil}
 		if intRange.Upper != nil && *intRange.Upper < intValue {
 			return err
