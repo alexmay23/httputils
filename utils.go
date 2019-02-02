@@ -28,16 +28,13 @@ func SetInContext(value interface{}, key interface{}, req *http.Request) *http.R
 	return req.WithContext(ctx)
 }
 
-
-
-func ConvertMapToValue(value interface{}, jsonMap map[string]interface{})error{
+func ConvertMapToValue(value interface{}, jsonMap map[string]interface{}) error {
 	data, err := json.Marshal(jsonMap)
-	if err != nil{
-		return  err
+	if err != nil {
+		return err
 	}
 	return json.Unmarshal(data, value)
 }
-
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -59,20 +56,42 @@ func JSON(w http.ResponseWriter, value interface{}, code int) {
 	w.Write(bytes)
 }
 
-func DefaultMiddlewares(next http.Handler) http.Handler {
-	return AccessMiddleware(RecoverMiddleware(LoggingMiddleware(next)))
+func DefaultMiddlewaresFactory(secret string) func(http.Handler) http.Handler {
+	f := func(next http.Handler) http.Handler {
+		return AccessMiddlewareFactory(secret)(RecoverMiddleware(LoggingMiddleware(next)))
+	}
+	return f
 }
 
-func AccessMiddleware(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Secret") != "Excellent" {
-			HTTP403().Write(w)
-			return
-		}
-		next.ServeHTTP(w, r)
+func UnwrapOrDefault(value *int, d int) int {
+	if value != nil {
+		return *value
 	}
+	return d
+}
 
-	return http.HandlerFunc(fn)
+var DefaultMiddlewares = DefaultMiddlewaresFactory("Excellent")
+
+func AccessMiddlewareFactory(secret string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			if r.Header.Get("Secret") != secret {
+				HTTP403().Write(w)
+				return
+			}
+			next.ServeHTTP(w, r)
+		}
+
+		return http.HandlerFunc(fn)
+	}
+}
+
+func WriteResponseOrError(w http.ResponseWriter, code int, response interface{}, err error) {
+	if err != nil {
+		err.(ServerError).Write(w)
+		return
+	}
+	JSON(w, response, code)
 }
 
 func RecoverMiddleware(next http.Handler) http.Handler {
@@ -115,8 +134,7 @@ func GetBody(req *http.Request) (map[string]interface{}, error) {
 	return _map, nil
 }
 
-
-func ValidateBody(body map[string]interface{}, validatorMap VMap)(map[string]interface{}, error){
+func ValidateBody(body map[string]interface{}, validatorMap VMap) (map[string]interface{}, error) {
 	errs := ValidateMap(body, validatorMap)
 	if len(errs) > 0 {
 		return nil, ServerError{400, Errors{Errors: errs}}
