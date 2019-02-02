@@ -28,6 +28,17 @@ func SetInContext(value interface{}, key interface{}, req *http.Request) *http.R
 	return req.WithContext(ctx)
 }
 
+
+
+func ConvertMapToValue(value interface{}, jsonMap map[string]interface{})error{
+	data, err := json.Marshal(jsonMap)
+	if err != nil{
+		return  err
+	}
+	return json.Unmarshal(data, value)
+}
+
+
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func RandStringBytes(n int) string {
