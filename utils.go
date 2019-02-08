@@ -70,7 +70,6 @@ func UnwrapOrDefault(value *int, d int) int {
 	return d
 }
 
-var DefaultMiddlewares = DefaultMiddlewaresFactory("Excellent")
 
 func AccessMiddlewareFactory(secret string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
