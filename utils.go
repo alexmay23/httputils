@@ -63,13 +63,26 @@ func DefaultMiddlewaresFactory(secret string) func(http.Handler) http.Handler {
 	return f
 }
 
-func UnwrapOrDefault(value *int, d int) int {
+func UnwrapOrDefaultInt(value *int, d int) int {
 	if value != nil {
 		return *value
 	}
 	return d
 }
 
+func UnwrapOrDefaultString(value *string, d string) string {
+	if value != nil {
+		return *value
+	}
+	return d
+}
+
+func UnwrapOrDefaultBool(value *bool, d bool) bool {
+	if value != nil {
+		return *value
+	}
+	return d
+}
 
 func AccessMiddlewareFactory(secret string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -246,6 +259,18 @@ func IntParameterFromRequest(r *http.Request, name string) *int {
 	}
 	i := int(i64)
 	return &i
+}
+
+func BoolParameterFromRequest(r *http.Request, name string) *bool {
+	s := GetValueFromURLInRequest(r, name)
+	if s == nil {
+		return nil
+	}
+	b, err := strconv.ParseBool(*s)
+	if err != nil {
+		return nil
+	}
+	return &b
 }
 
 func FloatParameterFromRequest(r *http.Request, name string) *float64 {
